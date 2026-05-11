@@ -19,38 +19,58 @@ import (
 )
 
 func newGAService(ctx context.Context, cfg appConfig) (*analyticsdata.Service, error) {
-	tokenSource, err := newOAuthTokenSource(ctx, cfg.GAOAuthClientSecretFile, cfg.GAOAuthTokenFile)
+	tokenSource, err := newOAuthTokenSource(
+		ctx,
+		cfg.GAOAuthClientSecretFile,
+		cfg.GAOAuthTokenFile,
+		cfg.GAOAuthClientSecretJSON,
+		cfg.GAOAuthTokenJSON,
+	)
 	if err != nil {
 		return nil, fmt.Errorf("oauth init failed: %w", err)
 	}
 	return analyticsdata.NewService(ctx, option.WithTokenSource(tokenSource))
 }
 
-func newOAuthTokenSource(ctx context.Context, clientSecretFile, tokenFile string) (oauth2.TokenSource, error) {
-	b, err := os.ReadFile(clientSecretFile)
+func newOAuthTokenSource(ctx context.Context, clientSecretFile, tokenFile, clientSecretJSON, tokenJSON string) (oauth2.TokenSource, error) {
+	b, err := readOAuthClientSecret(clientSecretFile, clientSecretJSON)
 	if err != nil {
-		return nil, fmt.Errorf("cannot read oauth client secret file: %w", err)
+		return nil, err
 	}
-
 	cfg, err := google.ConfigFromJSON(b, analyticsdata.AnalyticsReadonlyScope)
 	if err != nil {
 		return nil, fmt.Errorf("invalid oauth client config: %w", err)
 	}
-
-	token, err := readOAuthToken(tokenFile)
+	token, err := readOAuthToken(tokenFile, tokenJSON)
 	if err != nil {
-		return nil, fmt.Errorf("cannot read oauth token file: %w", err)
+		return nil, err
 	}
 
 	return cfg.TokenSource(ctx, token), nil
 }
 
-func readOAuthToken(path string) (*oauth2.Token, error) {
+func readOAuthClientSecret(path, rawJSON string) ([]byte, error) {
+	if strings.TrimSpace(rawJSON) != "" {
+		return []byte(rawJSON), nil
+	}
 	b, err := os.ReadFile(path)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cannot read oauth client secret file: %w", err)
 	}
+	return b, nil
+}
 
+func readOAuthToken(path, rawJSON string) (*oauth2.Token, error) {
+	var b []byte
+	if strings.TrimSpace(rawJSON) != "" {
+		b = []byte(rawJSON)
+	} else {
+		fileBytes, err := os.ReadFile(path)
+		if err != nil {
+			return nil, fmt.Errorf("cannot read oauth token file: %w", err)
+		}
+		b = fileBytes
+	}
 	var token oauth2.Token
 	if err := json.Unmarshal(b, &token); err != nil {
 		return nil, fmt.Errorf("invalid oauth token json: %w", err)

@@ -11,6 +11,8 @@ type appConfig struct {
 	GAPropertyID            string
 	GAOAuthClientSecretFile string
 	GAOAuthTokenFile        string
+	GAOAuthClientSecretJSON string
+	GAOAuthTokenJSON        string
 	OAuthBootstrap          bool
 
 	UpdateMode string
@@ -32,6 +34,8 @@ func loadConfigFromEnv() (appConfig, error) {
 		GAPropertyID:            os.Getenv("GA4_PROPERTY_ID"),
 		GAOAuthClientSecretFile: os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET_FILE"),
 		GAOAuthTokenFile:        os.Getenv("GOOGLE_OAUTH_TOKEN_FILE"),
+		GAOAuthClientSecretJSON: strings.TrimSpace(os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET_JSON")),
+		GAOAuthTokenJSON:        strings.TrimSpace(os.Getenv("GOOGLE_OAUTH_TOKEN_JSON")),
 		OAuthBootstrap:          strings.EqualFold(os.Getenv("OAUTH_BOOTSTRAP"), "1"),
 
 		UpdateMode:        strings.ToLower(strings.TrimSpace(getEnvOrDefault("TELEGRAM_UPDATE_MODE", updateModePolling))),
@@ -42,8 +46,8 @@ func loadConfigFromEnv() (appConfig, error) {
 	}
 
 	if cfg.OAuthBootstrap {
-		if cfg.GAOAuthClientSecretFile == "" || cfg.GAOAuthTokenFile == "" {
-			return cfg, fmt.Errorf("OAUTH_BOOTSTRAP=1 requires GOOGLE_OAUTH_CLIENT_SECRET_FILE and GOOGLE_OAUTH_TOKEN_FILE")
+		if cfg.GAOAuthClientSecretJSON == "" && cfg.GAOAuthClientSecretFile == "" {
+			return cfg, fmt.Errorf("OAUTH_BOOTSTRAP=1 requires GOOGLE_OAUTH_CLIENT_SECRET_JSON or GOOGLE_OAUTH_CLIENT_SECRET_FILE")
 		}
 		return cfg, nil
 	}
@@ -51,8 +55,11 @@ func loadConfigFromEnv() (appConfig, error) {
 	if cfg.BotToken == "" || cfg.GAPropertyID == "" {
 		return cfg, fmt.Errorf("missing required env: BOT_TOKEN, GA4_PROPERTY_ID")
 	}
-	if cfg.GAOAuthClientSecretFile == "" || cfg.GAOAuthTokenFile == "" {
-		return cfg, fmt.Errorf("missing required env for OAuth: GOOGLE_OAUTH_CLIENT_SECRET_FILE, GOOGLE_OAUTH_TOKEN_FILE")
+	if cfg.GAOAuthClientSecretJSON == "" && cfg.GAOAuthClientSecretFile == "" {
+		return cfg, fmt.Errorf("missing required OAuth env: GOOGLE_OAUTH_CLIENT_SECRET_JSON or GOOGLE_OAUTH_CLIENT_SECRET_FILE")
+	}
+	if cfg.GAOAuthTokenJSON == "" && cfg.GAOAuthTokenFile == "" {
+		return cfg, fmt.Errorf("missing required OAuth env: GOOGLE_OAUTH_TOKEN_JSON or GOOGLE_OAUTH_TOKEN_FILE")
 	}
 
 	if cfg.UpdateMode != updateModePolling && cfg.UpdateMode != updateModeWebhook {
