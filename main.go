@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"log"
+	"net/http"
+	"os"
 
 	"github.com/joho/godotenv"
 )
@@ -30,7 +32,30 @@ func main() {
 		log.Fatal(err)
 	}
 
+	startRenderHealthServer()
+
 	if err := runTelegramBot(ctx, cfg, gaSvc); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func startRenderHealthServer() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		return
+	}
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("ok"))
+	})
+
+	go func() {
+		addr := ":" + port
+		log.Printf("Health server listening on %s", addr)
+		if err := http.ListenAndServe(addr, mux); err != nil {
+			log.Printf("health server stopped: %v", err)
+		}
+	}()
 }
