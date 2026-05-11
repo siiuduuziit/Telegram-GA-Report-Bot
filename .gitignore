@@ -1,0 +1,4 @@
+.env
+oauth-client-secret.json
+oauth-token.json
+email_bot.txt
