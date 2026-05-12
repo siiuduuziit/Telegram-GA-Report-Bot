@@ -35,6 +35,12 @@ func runTelegramBot(ctx context.Context, cfg appConfig, gaSvc *analyticsdata.Ser
 		}
 
 		text := strings.TrimSpace(strings.ToLower(update.Message.Text))
+		if isStartCommand(text) {
+			welcome := "Chào mừng bạn đến tới GA4 Report Bot.\nDùng /update hoặc chat 'hey bot update me' để nhận báo cáo mới nhất."
+			_, _ = ctx.Bot().SendMessage(ctx, tu.Message(tu.ID(update.Message.Chat.ID), welcome))
+			return nil
+		}
+
 		if !isUpdateCommand(text) {
 			return nil
 		}
@@ -46,6 +52,10 @@ func runTelegramBot(ctx context.Context, cfg appConfig, gaSvc *analyticsdata.Ser
 
 	log.Println(startMsg)
 	return h.Start()
+}
+
+func isStartCommand(text string) bool {
+	return text == "/start" || text == "/start@telegram_ga_report_bot"
 }
 
 func isUpdateCommand(text string) bool {
