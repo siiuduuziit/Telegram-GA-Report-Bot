@@ -38,7 +38,8 @@ func loadConfigFromEnv() (appConfig, error) {
 		GAOAuthTokenJSON:        strings.TrimSpace(os.Getenv("GOOGLE_OAUTH_TOKEN_JSON")),
 		OAuthBootstrap:          strings.EqualFold(os.Getenv("OAUTH_BOOTSTRAP"), "1"),
 
-		UpdateMode:        strings.ToLower(strings.TrimSpace(getEnvOrDefault("TELEGRAM_UPDATE_MODE", updateModePolling))),
+		UpdateMode: strings.ToLower(strings.TrimSpace(getEnvOrDefault("TELEGRAM_UPDATE_MODE", updateModePolling))),
+
 		WebhookListenAddr: getEnvOrDefault("TELEGRAM_WEBHOOK_LISTEN_ADDR", ":8080"),
 		WebhookPath:       getEnvOrDefault("TELEGRAM_WEBHOOK_PATH", "POST /telegram/webhook"),
 		WebhookURL:        strings.TrimSpace(os.Getenv("TELEGRAM_WEBHOOK_URL")),
