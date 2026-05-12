@@ -35,7 +35,7 @@ func runTelegramBot(ctx context.Context, cfg appConfig, gaSvc *analyticsdata.Ser
 		}
 
 		text := strings.TrimSpace(strings.ToLower(update.Message.Text))
-		if text != "hey bot update me" {
+		if !isUpdateCommand(text) {
 			return nil
 		}
 
@@ -46,6 +46,15 @@ func runTelegramBot(ctx context.Context, cfg appConfig, gaSvc *analyticsdata.Ser
 
 	log.Println(startMsg)
 	return h.Start()
+}
+
+func isUpdateCommand(text string) bool {
+	switch text {
+	case "/update", "/update@telegram_ga_report_bot", "hey bot update me":
+		return true
+	default:
+		return false
+	}
 }
 
 func newUpdateSource(ctx context.Context, cfg appConfig, bot *telego.Bot) (<-chan telego.Update, string, error) {
