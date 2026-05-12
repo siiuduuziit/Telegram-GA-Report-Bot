@@ -55,16 +55,16 @@ func runTelegramBot(ctx context.Context, cfg appConfig, gaSvc *analyticsdata.Ser
 }
 
 func isStartCommand(text string) bool {
-	return text == "/start" || text == "/start@telegram_ga_report_bot"
+	text = strings.TrimSpace(strings.ToLower(text))
+	return text == "/start" || strings.HasPrefix(text, "/start@")
 }
 
 func isUpdateCommand(text string) bool {
-	switch text {
-	case "/update", "/update@telegram_ga_report_bot", "hey bot update me":
+	text = strings.TrimSpace(strings.ToLower(text))
+	if strings.HasPrefix(text, "/update@") {
 		return true
-	default:
-		return false
 	}
+	return text == "/update" || text == "hey bot update me"
 }
 
 func newUpdateSource(ctx context.Context, cfg appConfig, bot *telego.Bot) (<-chan telego.Update, string, error) {
