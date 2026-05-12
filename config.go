@@ -41,7 +41,7 @@ func loadConfigFromEnv() (appConfig, error) {
 		UpdateMode: strings.ToLower(strings.TrimSpace(getEnvOrDefault("TELEGRAM_UPDATE_MODE", updateModePolling))),
 
 		WebhookListenAddr: getEnvOrDefault("TELEGRAM_WEBHOOK_LISTEN_ADDR", ":8080"),
-		WebhookPath:       getEnvOrDefault("TELEGRAM_WEBHOOK_PATH", "POST /telegram/webhook"),
+		WebhookPath:       getEnvOrDefault("TELEGRAM_WEBHOOK_PATH", "/telegram/webhook"),
 		WebhookURL:        strings.TrimSpace(os.Getenv("TELEGRAM_WEBHOOK_URL")),
 		WebhookSecret:     strings.TrimSpace(os.Getenv("TELEGRAM_WEBHOOK_SECRET")),
 	}
