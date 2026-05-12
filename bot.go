@@ -90,6 +90,11 @@ func setupPollingUpdates(ctx context.Context, bot *telego.Bot) (<-chan telego.Up
 
 func setupWebhookUpdates(ctx context.Context, cfg appConfig, bot *telego.Bot) (<-chan telego.Update, string, error) {
 	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("ok"))
+	})
+
 	server := &http.Server{
 		Addr:    cfg.WebhookListenAddr,
 		Handler: mux,

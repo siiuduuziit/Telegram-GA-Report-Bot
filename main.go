@@ -32,7 +32,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	startRenderHealthServer()
+	if cfg.UpdateMode != updateModeWebhook {
+		startRenderHealthServer()
+	}
 
 	if err := runTelegramBot(ctx, cfg, gaSvc); err != nil {
 		log.Fatal(err)
